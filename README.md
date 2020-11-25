@@ -11,7 +11,7 @@ Simply cut and paste this command in to a terminal on your computer. If you are 
 
 ```
 
-wget https://github.com/vonschutter/RTD-VPN-Router/raw/master/rtd-start-vpn-router && chmod +x rtd-start-vpn-router && bash rtd-start-vpn-router 
+wget https://github.com/vonschutter/RTD-VPN-Router/raw/main/rtd-start-vpn-router && chmod +x rtd-start-vpn-router && bash rtd-start-vpn-router 
 
 ```
 
