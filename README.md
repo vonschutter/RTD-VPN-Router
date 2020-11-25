@@ -6,7 +6,7 @@ After you have started the script you only have to direct all your traffic to th
 
 For the simplest setup it is recommended that you install Debian or Ubuntu on the machine to be used as a VPN Router. 
 
-### How to enroll...
+### How to use the script...
 Simply cut and paste this command in to a terminal on your computer. If you are using Windows, download the file "rtd-me.sh.cmd" and double click it. 
 
 ```
