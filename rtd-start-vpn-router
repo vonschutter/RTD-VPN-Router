@@ -11,11 +11,12 @@
 #::		* Added setup actions to auto login and auto start router on reboot
 #::
 #::	Purpose: The purpose of the script is to setup iptables (Fire Wall) so that it will forward all traffic through
-#:: a vpn (tun0) and block all traffic if the VPN is down for any reason. This will ensure that
-#:: traffic is not accidentally exposed to evil authorities.
-#::           - Local interface is "ens3"
-#::           - VPN tunnel interface is "tun0"
-#:: If either of these are different on your system you must change these in the script.
+#:: 		 a vpn (tun0) and block all traffic if the VPN is down for any reason. This will ensure that
+#:: 		 traffic is not accidentally exposed to evil authorities.
+#::              - Local interface is "ens3"
+#::              - VPN tunnel interface is "tun0"
+#:: 		If either of these are different on your system you must change these in the script.
+#::		The script will, however, try to identify the primary local newtork interface.
 #::
 #:: You may for exaple deploy a Debian based VM, and install your preferred VPN, run this script,
 #:: and then configure your client devices to (via DHCP) route all traffic through the VM's IP address.
@@ -61,24 +62,24 @@ function find_active_newtork_interface (){
 rtd_oem_setup_autologin () {
 
 	mkdir -p /etc/systemd/system/getty@tty1.service.d
-	
+
 	if [ ! -f /etc/systemd/system/getty@tty1.service.d/override.conf ]; then
 		echo "***********  Updating Autologin information... ************ "
 		echo "[Service]" > /etc/systemd/system/getty@tty1.service.d/override.conf
 		echo "ExecStart=" >> /etc/systemd/system/getty@tty1.service.d/override.conf
 		echo "ExecStart=-/sbin/agetty --noissue --autologin $SUDO_USER %I $TERM" >> /etc/systemd/system/getty@tty1.service.d/override.conf
 		echo "Type=idle" >> /etc/systemd/system/getty@tty1.service.d/override.conf
-	else 
+	else
 		echo "/etc/systemd/system/getty@tty1.service.d/override.conf is already present... "
 	fi
 
 
-	if [ ! $(cat $SUDO_USER/.bashrc |grep rtd-start-vpn-router)  ]; then 
+	if [ ! $(cat $SUDO_USER/.bashrc |grep rtd-start-vpn-router)  ]; then
 		echo "**********    Seting up vpn router to start automatically   ************* "
-		echo "if [ -f ~/bin/rtd-start-vpn-router ]; then" >>$SUDO_USER/.bashrc 
-		echo "bash ~/bin/rtd-start-vpn-router" $SUDO_USER/.bashrc 
-		echo "fi"  >> $SUDO_USER/.bashrc 
-	else 
+		echo "if [ -f ~/bin/rtd-start-vpn-router ]; then" >>$SUDO_USER/.bashrc
+		echo "bash ~/bin/rtd-start-vpn-router" $SUDO_USER/.bashrc
+		echo "fi"  >> $SUDO_USER/.bashrc
+	else
 		echo "$SUDO_USER/.bashrc already updated... "
 	fi
 }
@@ -94,7 +95,7 @@ check_dependencies () {
 		echo "I found that $1 is present on this system... thankyou for that! "
 	else
 		echo "You seem to have no $1... I will try to get it... "
-		sudo apt install $1 -y
+		install_software $1
 		if [ $? != 0 ];
 		then
 			echo "That install didn't work out so well."
@@ -109,13 +110,13 @@ check_dependencies () {
 
 rtd_oem_setup_auth_launch_vpn () {
 	# Add instruction to a sudoers include file:
-	# This should be removed when OEM setup is complete as it would represent a back door... 
-	# if [ ! /etc/sudoers.d/99_sudo_include_file ]; then 
+	# This should be removed when OEM setup is complete as it would represent a back door...
+	# if [ ! /etc/sudoers.d/99_sudo_include_file ]; then
 		echo "$SUDO_USER ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/99_sudo_include_file
 
 		# Check that your sudoers include file passed the visudo syntax checks:
 		sudo visudo -cf /etc/sudoers.d/99_sudo_include_file
-	# else 
+	# else
 	# 	echo "/etc/sudoers.d/99_sudo_include_file already updated..."
 	# fi
 }
@@ -126,7 +127,7 @@ setup_routing_for_vpn () {
 	echo #---------------------------------------------------------------
 	echo "Checking for iptables and install if not there..."
 	echo #---------------------------------------------------------------
-	check_dependencies iptables 
+	check_dependencies iptables
 
 	echo #---------------------------------------------------------------
 	echo "Removing old rules and tables..."
@@ -174,8 +175,8 @@ setup_routing_for_vpn () {
 
 start_vpn_nat_monitor () {
 
-	# Check that the required packages are installed and add them if not. 
-	check_dependencies byobu 
+	# Check that the required packages are installed and add them if not.
+	check_dependencies byobu
 	check_dependencies speedometer
 
 	byobu new-session -d -s $USER
@@ -213,7 +214,7 @@ start_vpn_nat_monitor () {
 
 run_nordvpn() {
 	if hash nordvpn 2>/dev/null; then
-		nordvpn connect 
+		nordvpn connect
 
 	else
 		if ($rtd_menu --title "$_branding helper: Get VPN" --yesno "Nordvpn is not installed... I need to download it from the internet. Is this OK?" 8 78); then
@@ -297,14 +298,14 @@ err_no_menu_system_found () {
 
 install_software () {
 	if hash pkcon 2>/dev/null; then
-		pkcon -y  install $@
+		sudo pkcon -y  install $@
 	elif hash yum 2>/dev/null; then
-		yum -y  install $@
+		sudo yum -y  install $@
 	elif hash zypper 2>/dev/null; then
-		zypper install -y $@
+		sudo zypper install -y $@
 	elif hash apt-get 2>/dev/null; then
 		export DEBIAN_FRONTEND=noninteractive
-		apt-get -y -qq --allow-change-held-packages --ignore-missing install $@
+		sudo apt-get -y -qq --allow-change-held-packages --ignore-missing install $@
 	else
 		echo -e $YELLOW "This system does not seem to have a software managment system" $ENDCOLOR
 		err_no_menu_system_available
@@ -321,10 +322,10 @@ install_software () {
 #::::::::::::::                                          ::::::::::::::::::::::
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 #
-# This particular version of this script requires HMA Vpn. HMA is just a script 
-# in the case of linux, but you need an account with HMA for this to work. 
+# This particular version of this script requires HMA Vpn. HMA is just a script
+# in the case of linux, but you need an account with HMA for this to work.
 # To automate the connection you may save your VPN credentials in a file
-# or use PAM if you really know your stuff... ensure that the file is only 
+# or use PAM if you really know your stuff... ensure that the file is only
 # readable by you or root, lest someone else use your VPN for bad things.
 
 
