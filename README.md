@@ -1,6 +1,6 @@
 # RTD-VPN-Router
 
-The RTD-VPN_Router is a simple script that you can use on a server, old PC, or a virtual machine at home or at a small business. It will automatically configure and setup that machine as a VPN router. 
+The RTD-VPN-Router is a simple script that you can use on a server, old PC, or a virtual machine at home or at a small business. It will automatically configure and setup that machine as a VPN router. 
 
 After you have started the script you only have to direct all your traffic to the IP address of the VPN touter by updating the "gateway" on your DHCP service (usually on your internet router if you are a home user or small business). It is recommended that you set a static IP on the machine running the script.
 
