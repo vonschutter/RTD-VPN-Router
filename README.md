@@ -4,6 +4,8 @@ The RTD-VPN-Router is a simple script that you can use on a server, old PC, or a
 
 After you have started the script you only have to direct all your traffic to the IP address of the VPN touter by updating the "gateway" on your DHCP service (usually on your internet router if you are a home user or small business). It is recommended that you set a static IP on the machine running the script.
 
+You may use any VPN software that you like for the actual VPN on the Linux server, however the script is preconfigured to use NordVPN by default. Remember to purchase the VPN service and note the credentials before starting the script.
+
 For the simplest setup it is recommended that you install Debian or Ubuntu on the machine to be used as a VPN Router. 
 
 ### How to use the script...
