@@ -32,7 +32,7 @@
 #::::::::::::::                                          ::::::::::::::::::::::
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-_LOCALINT="ens3"
+_LOCALINT=
 _VPNINT="tun0"
 _LOCALNET="192.168.1.0"
 _LOCALSUB="24"
@@ -52,10 +52,16 @@ NORDVPN_RPM="https://repo.nordvpn.com/yum/nordvpn/centos/noarch/Packages/n/nordv
 #::::::::::::::                                          ::::::::::::::::::::::
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-function find_active_newtork_interface (){
-	NETINT=`ip addr | awk '/state UP/ {print $2}' |grep -v "br*" |grep -v "wlp*" | head --bytes -2 `
+find_active_newtork_interface (){
+	NETINT=$(ip addr | awk '/state UP/ {print $2}' |grep -v "br*" |grep -v "wlp*" | head --bytes -2 )
 	echo "Active network interface is: $NETINT"
-	_LOCALINT=$NETINT
+	"${_LOCALINT:-$NETINT}"
+}
+
+find_active_bridge_interface () {
+	# Discover if the appropriate VM net interface is (default or br'0 - n')
+	VIRT_NET="$(if ls /sys/class/net |grep br |grep -v virbr >/dev/null; then echo "bridge:$(ls /sys/class/net)" |grep tun ; else echo default;fi)"
+	"${_VPNINT:-$VIRT_NET}"
 }
 
 
@@ -143,9 +149,9 @@ setup_routing_for_vpn () {
 	echo #---------------------------------------------------------------
 	echo "Default Policy - Drop everything!"
 	echo #---------------------------------------------------------------
-	#iptables -P INPUT DROP
-	#iptables -P FORWARD DROP
-	#iptables -P OUTPUT DROP
+	iptables -P INPUT DROP
+	iptables -P FORWARD DROP
+	iptables -P OUTPUT DROP
 
 	echo #---------------------------------------------------------------
 	echo "Allow all local connections."
@@ -298,14 +304,14 @@ err_no_menu_system_found () {
 
 install_software () {
 	if hash pkcon 2>/dev/null; then
-		sudo pkcon -y  install $@
+		sudo pkcon -y  install "$@"
 	elif hash yum 2>/dev/null; then
-		sudo yum -y  install $@
+		sudo yum -y  install "$@"
 	elif hash zypper 2>/dev/null; then
-		sudo zypper install -y $@
+		sudo zypper install -y "$@"
 	elif hash apt-get 2>/dev/null; then
 		export DEBIAN_FRONTEND=noninteractive
-		sudo apt-get -y -qq --allow-change-held-packages --ignore-missing install $@
+		sudo apt-get -y -qq --allow-change-held-packages --ignore-missing install "$@"
 	else
 		echo -e $YELLOW "This system does not seem to have a software managment system" $ENDCOLOR
 		err_no_menu_system_available
@@ -329,8 +335,9 @@ install_software () {
 # readable by you or root, lest someone else use your VPN for bad things.
 
 
-pushd /home/$SUDO_USER
+pushd "/home/$SUDO_USER" || echo "Failed to enter /home/$SUDO_USER "
 find_active_newtork_interface
+find_active_bridge_interface
 rtd_oem_setup_autologin
 rtd_oem_setup_auth_launch_vpn
 check_menu_availability
