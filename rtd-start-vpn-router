@@ -284,7 +284,7 @@ check_menu_availability () {
 
 err_no_menu_system_found () {
 	echo -e "$RED There is no way to display menus on this system $ENDCOLOR"
-	echo -e "This is required to display the chices of countries..."
+	echo -e "This is required to display the choices of countries..."
 	echo -e "$YELLOW May I attepmpt to install this ability to your system? $ENDCOLOR"
 	read -p "Add software: (y/n)?" choice
 	case "$choice" in
