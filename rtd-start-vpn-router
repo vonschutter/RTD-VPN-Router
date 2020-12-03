@@ -161,9 +161,9 @@ setup_routing_for_vpn () {
 	iptables -A INPUT  -i $_LOCALINT  -j ACCEPT
 	iptables -A OUTPUT -o $_LOCALINT  -j ACCEPT
 	# Allow traffic on the TUN interface.
-	-A INPUT -i tun0 -j ACCEPT
-	-A FORWARD -i tun0 -j ACCEPT
-	-A OUTPUT -o tun0 -j ACCEPT
+	iptables -A INPUT -i $_VPNINT -j ACCEPT
+	iptables -A FORWARD -i $_VPNINT -j ACCEPT
+	iptables -A OUTPUT -o $_VPNINT -j ACCEPT
 
 
 	#---------------------------------------------------------------
